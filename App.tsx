@@ -24,24 +24,12 @@ const App: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch fonts manually to inject as inline styles
+  // Load fonts for the page
   useEffect(() => {
-    const loadFonts = async () => {
-      try {
-        const response = await fetch('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        const css = await response.text();
-        const style = document.createElement('style');
-        style.textContent = css;
-        document.head.appendChild(style);
-      } catch (error) {
-        console.error('Error loading fonts:', error);
-        const link = document.createElement('link');
-        link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap';
-        link.rel = 'stylesheet';
-        document.head.appendChild(link);
-      }
-    };
-    loadFonts();
+    const link = document.createElement('link');
+    link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
   }, []);
 
   const handleCsvUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,7 +64,7 @@ const App: React.FC = () => {
   };
 
   const handleDownloadPDF = async () => {
-    if (isGenerating) return;
+    if (isGenerating || students.length === 0) return;
     setIsGenerating(true);
     setProgress(0);
 
@@ -90,10 +78,7 @@ const App: React.FC = () => {
       const pageWidth = 210;
       const pageHeight = 297;
       const margin = 10;
-      // Dimensions for the card pair image on the PDF
-      // We target roughly 150mm width for the pair (Front + Back side by side)
-      // This leaves room for margins and keeps resolution high
-      const targetImgWidth = 160; 
+      const targetImgWidth = 180; 
       
       let yOffset = margin;
       
@@ -103,23 +88,25 @@ const App: React.FC = () => {
         const element = document.getElementById(`card-${i}`);
         if (!element) continue;
 
-        // Temporarily make background transparent for clean capture
-        const originalBg = element.style.backgroundColor;
-        const originalBoxShadow = element.style.boxShadow;
-        element.style.backgroundColor = 'transparent';
-        element.style.boxShadow = 'none';
-
         try {
+          // Use more robust options for html-to-image
           const dataUrl = await toPng(element, { 
-            quality: 0.9, 
-            pixelRatio: 2, // 2x for good print quality
-            // We force a transparent background here too just in case
-            backgroundColor: 'rgba(0,0,0,0)' 
+            quality: 1, 
+            pixelRatio: 2,
+            backgroundColor: 'rgba(0,0,0,0)',
+            cacheBust: true,
+            // Style overrides to ensure transparency during capture
+            style: {
+              backgroundColor: 'transparent',
+              boxShadow: 'none',
+              transform: 'none'
+            }
           });
 
-          // Restore styles
-          element.style.backgroundColor = originalBg;
-          element.style.boxShadow = originalBoxShadow;
+          if (!dataUrl || dataUrl === 'data:,') {
+            console.error(`Failed to capture card ${i}`);
+            continue;
+          }
 
           const imgProps = doc.getImageProperties(dataUrl);
           const pdfHeight = (imgProps.height * targetImgWidth) / imgProps.width;
@@ -131,20 +118,13 @@ const App: React.FC = () => {
           }
 
           doc.addImage(dataUrl, 'PNG', (pageWidth - targetImgWidth) / 2, yOffset, targetImgWidth, pdfHeight);
+          yOffset += pdfHeight + 8;
           
-          // Add a faint cut line or border? 
-          // Optional: doc.setDrawColor(200); doc.rect((pageWidth - targetImgWidth) / 2, yOffset, targetImgWidth, pdfHeight);
-          
-          yOffset += pdfHeight + 10; // 10mm gap between rows
-          
-          // Minimal delay to allow UI update
-          await new Promise(resolve => setTimeout(resolve, 10));
+          // Brief pause to keep UI responsive and ensure memory management
+          await new Promise(resolve => setTimeout(resolve, 50));
 
         } catch (err) {
           console.error(`Error generating card ${i}`, err);
-          // Restore styles in case of error
-          element.style.backgroundColor = originalBg;
-          element.style.boxShadow = originalBoxShadow;
         }
       }
 
@@ -152,7 +132,7 @@ const App: React.FC = () => {
 
     } catch (error) {
       console.error("PDF Generation failed", error);
-      alert("Failed to generate PDF");
+      alert("Failed to generate PDF. Please try again.");
     } finally {
       setIsGenerating(false);
       setProgress(0);
@@ -179,10 +159,10 @@ const App: React.FC = () => {
               <button 
                 onClick={handleDownloadPDF}
                 disabled={isGenerating}
-                className="flex items-center gap-2 px-6 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm font-bold transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-wait"
+                className="flex items-center gap-2 px-6 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm font-bold transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-wait min-w-[160px] justify-center"
               >
                 {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
-                {isGenerating ? `Generating (${progress}%)` : 'Download PDF'}
+                {isGenerating ? `Generating ${progress}%` : 'Download PDF'}
               </button>
               <button 
                 onClick={clearData}
@@ -266,7 +246,7 @@ const App: React.FC = () => {
             {/* Grid Container */}
             <div className="cards-grid grid grid-cols-1 gap-12">
               {students.map((student, index) => (
-                <div key={index} className="id-card-wrapper">
+                <div key={index} className="id-card-wrapper flex justify-center">
                    <IDCard 
                      id={`card-${index}`}
                      student={student} 
@@ -291,7 +271,7 @@ const App: React.FC = () => {
               </button>
             </div>
 
-            <div className="space-y-6 overflow-y-auto pr-2 custom-scrollbar">
+            <div className="space-y-6 overflow-y-auto pr-2 flex-1">
               <ConfigInput 
                 label="Institution Name" 
                 value={config.schoolName} 
