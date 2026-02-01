@@ -18,6 +18,8 @@ const DEFAULT_CONFIG: CardConfig = {
   cardBgColor: '#0f172a',
   accentColor: '#3b82f6', // blue-500
   textColor: '#ffffff',
+  detailsColor: '#ffffff',
+  backTextColor: '#ffffff',
   showPattern: true,
 
   labelClass: 'CLASS',
@@ -457,20 +459,31 @@ const App: React.FC = () => {
                       </div>
                       
                       <div className="grid grid-cols-1 gap-4">
-                         <ColorInput 
+                          <ColorInput 
                             label="Card Background" 
                             value={config.cardBgColor} 
                             onChange={(v) => setConfig({...config, cardBgColor: v})} 
                           />
                           <ColorInput 
-                            label="Text Color" 
+                            label="Accent Color" 
+                            value={config.accentColor} 
+                            onChange={(v) => setConfig({...config, accentColor: v})} 
+                          />
+                          <div className="h-px bg-slate-800 my-2" />
+                          <ColorInput 
+                            label="Main Text (Front Name/School)" 
                             value={config.textColor} 
                             onChange={(v) => setConfig({...config, textColor: v})} 
                           />
                           <ColorInput 
-                            label="Accent Color" 
-                            value={config.accentColor} 
-                            onChange={(v) => setConfig({...config, accentColor: v})} 
+                            label="Details Content (Class/ID/etc)" 
+                            value={config.detailsColor} 
+                            onChange={(v) => setConfig({...config, detailsColor: v})} 
+                          />
+                          <ColorInput 
+                            label="Back Side Text" 
+                            value={config.backTextColor} 
+                            onChange={(v) => setConfig({...config, backTextColor: v})} 
                           />
                       </div>
                    </div>

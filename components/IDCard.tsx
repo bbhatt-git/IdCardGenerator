@@ -105,18 +105,38 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
         <div className="relative z-10 px-6 pb-8 mt-auto">
           <div className="bg-slate-900/80 backdrop-blur-md rounded-2xl p-6 border border-slate-700/50 shadow-inner">
             <div className="grid grid-cols-2 gap-y-5 gap-x-4">
-              <DetailItem label={config.labelClass} value={student.class} textColor={config.textColor} />
-              <DetailItem label={config.labelSection} value={student.section} textColor={config.textColor} />
-              <DetailItem label={config.labelId} value={student.studentId} highlightColor={config.accentColor} textColor={config.textColor} />
+              <DetailItem 
+                label={config.labelClass} 
+                value={student.class} 
+                labelColor={config.textColor} 
+                valueColor={config.detailsColor} 
+              />
+              <DetailItem 
+                label={config.labelSection} 
+                value={student.section} 
+                labelColor={config.textColor} 
+                valueColor={config.detailsColor} 
+              />
+              <DetailItem 
+                label={config.labelId} 
+                value={student.studentId} 
+                labelColor={config.textColor} 
+                valueColor={config.detailsColor} 
+              />
               {config.showContact && (
-                 <DetailItem label={config.labelContact} value={student.contact || "N/A"} textColor={config.textColor} />
+                 <DetailItem 
+                    label={config.labelContact} 
+                    value={student.contact || "N/A"} 
+                    labelColor={config.textColor} 
+                    valueColor={config.detailsColor} 
+                  />
               )}
             </div>
             {/* Validity Bar */}
             <div className="mt-5 pt-4 border-t border-slate-700/50 flex justify-between items-end">
                <div className="flex flex-col">
                   <span className="text-[9px] font-black uppercase tracking-widest mb-0.5" style={{ color: config.textColor, opacity: 0.7 }}>{config.labelIssued}</span>
-                  <span className="text-[12px] font-bold" style={{ color: config.textColor, opacity: 0.9 }}>{config.issuedYear}</span>
+                  <span className="text-[12px] font-bold" style={{ color: config.detailsColor, opacity: 0.9 }}>{config.issuedYear}</span>
                </div>
                <div className="flex flex-col text-right">
                   <span className="text-[9px] font-black uppercase tracking-widest mb-0.5" style={{ color: config.textColor, opacity: 0.7 }}>{config.labelValid}</span>
@@ -143,7 +163,7 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
           <div className="mb-4 opacity-90 p-4 bg-white/5 rounded-2xl border border-white/5">
              <RemoteImage src={config.logoUrl} alt="Logo" className="w-20 h-20" />
           </div>
-          <h3 className="font-black tracking-[0.3em] text-lg" style={{ color: config.textColor }}>QWICKATTEND</h3>
+          <h3 className="font-black tracking-[0.3em] text-lg" style={{ color: config.backTextColor }}>QWICKATTEND</h3>
           <div className="h-1 w-12 rounded-full mt-4" style={{ backgroundColor: config.accentColor }}></div>
         </div>
 
@@ -167,8 +187,8 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
           </div>
           
           <p 
-            className="text-[9px] text-center leading-tight max-w-[340px] font-medium" 
-            style={{ color: config.textColor, opacity: 0.8 }}
+            className="text-[11px] text-center leading-snug max-w-[340px] font-medium whitespace-pre-wrap" 
+            style={{ color: config.backTextColor, opacity: 0.8 }}
           >
             {config.disclaimerText}
           </p>
@@ -178,12 +198,12 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
   );
 };
 
-const DetailItem: React.FC<{ label: string; value: string; highlightColor?: string; textColor: string }> = ({ label, value, highlightColor, textColor }) => (
+const DetailItem: React.FC<{ label: string; value: string; labelColor: string; valueColor: string }> = ({ label, value, labelColor, valueColor }) => (
   <div className="flex flex-col">
-    <span className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: textColor, opacity: 0.7 }}>{label}</span>
+    <span className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: labelColor, opacity: 0.7 }}>{label}</span>
     <span 
         className="text-[15px] font-bold truncate" 
-        style={{ color: highlightColor || textColor, opacity: highlightColor ? 1 : 0.95 }}
+        style={{ color: valueColor, opacity: 0.95 }}
     >
         {value}
     </span>

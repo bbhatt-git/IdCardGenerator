@@ -19,7 +19,9 @@ export interface CardConfig {
   // Visual Customization
   cardBgColor: string;
   accentColor: string;
-  textColor: string;
+  textColor: string;      // Main Front Text (Name, School)
+  detailsColor: string;   // Content Text (Class, Section, ID, Contact)
+  backTextColor: string;  // Back Side Text (Header, Disclaimer)
   showPattern: boolean;
 
   // Label Customization
