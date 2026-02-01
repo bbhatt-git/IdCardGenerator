@@ -11,8 +11,10 @@ interface QRCodePatternProps {
 const QRCodePattern: React.FC<QRCodePatternProps> = ({ value, size = 140, color = "#000000" }) => {
   const modules = useMemo(() => {
     try {
-      // Type 0 = Auto detect version, 'H' = High Error Correction
-      const qr = qrcode(0, 'H');
+      // Type 0 = Auto detect version
+      // 'M' = Medium (15%) - Reduces density compared to 'H', making modules larger and easier to scan quickly.
+      // This is the standard sweet spot for general purpose reliable scanning.
+      const qr = qrcode(0, 'M'); 
       qr.addData(value);
       qr.make();
       const count = qr.getModuleCount();
@@ -42,19 +44,22 @@ const QRCodePattern: React.FC<QRCodePatternProps> = ({ value, size = 140, color 
            (r >= count - 7 && c < 7); // Bottom-Left
   };
 
-  const dots = [];
+  const dataModules = [];
   
   modules.forEach((row, r) => {
     row.forEach((isDark, c) => {
-      if (isFinder(r, c)) return; // Don't render standard dots in finder areas
+      if (isFinder(r, c)) return; 
       if (isDark) {
-        dots.push(
-          <circle 
+        // Standard Square Modules for instant readability
+        dataModules.push(
+          <rect 
             key={`${r}-${c}`} 
-            cx={c + 0.5} 
-            cy={r + 0.5} 
-            r={0.4} // Radius 0.4 creates distinct separated dots
+            x={c} 
+            y={r} 
+            width={1} 
+            height={1}
             fill={color} 
+            shapeRendering="crispEdges"
           />
         );
       }
@@ -69,29 +74,21 @@ const QRCodePattern: React.FC<QRCodePatternProps> = ({ value, size = 140, color 
   ];
 
   return (
-    <svg viewBox={`0 0 ${count} ${count}`} width={size} height={size} shapeRendering="geometricPrecision">
-      {/* Render the data dots */}
-      {dots}
+    <svg viewBox={`0 0 ${count} ${count}`} width={size} height={size} shapeRendering="crispEdges">
+      {/* Render the data modules */}
+      {dataModules}
       
-      {/* Render custom styled Finder Patterns (Eyes) */}
+      {/* Render Standard Square Finder Patterns for instant recognition */}
       {finderLocations.map((loc, i) => (
         <g key={i} transform={`translate(${loc.x}, ${loc.y})`}>
-          {/* Outer Frame: Rounded Square */}
-          <rect 
-            x="0.5" y="0.5" 
-            width="6" height="6" 
-            rx="1.5" ry="1.5" 
-            fill="none" 
-            stroke={color} 
-            strokeWidth="1" 
-          />
-          {/* Inner Eye: Rounded Square/Dot */}
-          <rect 
-            x="2" y="2" 
-            width="3" height="3" 
-            rx="1" ry="1" 
+          {/* Outer Ring (7x7 with 5x5 hole) */}
+          <path 
+            d="M0,0 h7 v7 h-7 z M1,1 v5 h5 v-5 z" 
             fill={color} 
+            fillRule="evenodd"
           />
+          {/* Inner Block (3x3) */}
+          <rect x="2" y="2" width="3" height="3" fill={color} />
         </g>
       ))}
     </svg>

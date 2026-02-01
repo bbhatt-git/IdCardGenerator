@@ -107,7 +107,7 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
 
         {/* QR Code Section */}
         <div className="relative z-10 flex flex-col items-center justify-center flex-1 w-full my-6">
-          <div className="p-5 bg-white rounded-3xl shadow-2xl">
+          <div className="p-6 bg-white rounded-3xl shadow-2xl">
             <QRCodePattern 
               value={student.studentId} 
               size={220} 
