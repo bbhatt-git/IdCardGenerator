@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Student, CardConfig } from './types';
 import IDCard from './components/IDCard';
-import { Upload, FileSpreadsheet, Download, Plus, Trash2, Edit2, X, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Upload, FileSpreadsheet, Download, Plus, Trash2, Edit2, X, Loader2, Image as ImageIcon, Palette, Type, Eye } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { toPng } from 'html-to-image';
 
@@ -14,6 +14,18 @@ const DEFAULT_CONFIG: CardConfig = {
   qrColor: '#000000',
   qrBgColor: '#FFFFFF',
   logoUrl: 'https://raw.githubusercontent.com/bbhatt-git/IdCardGenerator/refs/heads/main/public/qa.png',
+  
+  cardBgColor: '#0f172a',
+  accentColor: '#3b82f6', // blue-500
+  textColor: '#ffffff',
+  showPattern: true,
+
+  labelClass: 'CLASS',
+  labelSection: 'SECTION',
+  labelId: 'ID NO',
+  labelContact: 'CONTACT',
+
+  showContact: true,
 };
 
 const App: React.FC = () => {
@@ -25,6 +37,7 @@ const App: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const [configTab, setConfigTab] = useState<'general' | 'appearance' | 'labels'>('general');
 
   // Load fonts for the page
   useEffect(() => {
@@ -341,91 +354,215 @@ const App: React.FC = () => {
       {isConfigOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-end no-print">
           <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setIsConfigOpen(false)}></div>
-          <div className="relative w-full max-w-md h-full bg-[#0c1322] border-l border-slate-800 p-8 shadow-2xl flex flex-col">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-black">Global Config</h2>
+          <div className="relative w-full max-w-md h-full bg-[#0c1322] border-l border-slate-800 shadow-2xl flex flex-col">
+            <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-[#0f172a]">
+              <h2 className="text-xl font-black">Configuration</h2>
               <button onClick={() => setIsConfigOpen(false)} className="p-2 hover:bg-slate-800 rounded-full transition-colors">
-                <X size={24} />
+                <X size={20} />
               </button>
             </div>
 
-            <div className="space-y-6 overflow-y-auto pr-2 flex-1">
-              {/* Logo Upload */}
-              <div className="mb-6">
-                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Card Logo</h3>
-                 <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-slate-900 border border-slate-700 rounded-xl flex items-center justify-center overflow-hidden">
-                       {config.logoUrl ? (
-                         <img src={config.logoUrl} alt="Logo" className="w-full h-full object-contain p-2" />
-                       ) : (
-                         <ImageIcon className="text-slate-600" />
-                       )}
-                    </div>
-                    <div className="flex-1">
-                      <input 
-                        type="file" 
-                        ref={logoInputRef}
-                        accept="image/png"
-                        onChange={handleLogoUpload}
-                        className="hidden"
-                      />
-                      <button 
-                        onClick={() => logoInputRef.current?.click()}
-                        className="w-full px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-bold border border-slate-700 transition-colors mb-2"
-                      >
-                        Upload PNG Logo
-                      </button>
-                      <p className="text-[10px] text-slate-500">Recommended: Transparent PNG, 200x200px</p>
-                    </div>
-                 </div>
-              </div>
-
-              <ConfigInput 
-                label="Institution Name" 
-                value={config.schoolName} 
-                onChange={(v) => setConfig({...config, schoolName: v})} 
-              />
-              <ConfigInput 
-                label="Address" 
-                value={config.schoolAddress} 
-                onChange={(v) => setConfig({...config, schoolAddress: v})} 
-              />
-              <div className="grid grid-cols-2 gap-4">
-                <ConfigInput 
-                  label="Issued Year" 
-                  value={config.issuedYear} 
-                  onChange={(v) => setConfig({...config, issuedYear: v})} 
-                />
-                <ConfigInput 
-                  label="Valid Until" 
-                  value={config.validUntil} 
-                  onChange={(v) => setConfig({...config, validUntil: v})} 
-                />
-              </div>
-
-              <div className="pt-6 border-t border-slate-800">
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">QR Styling</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <ColorInput 
-                    label="QR Dots" 
-                    value={config.qrColor} 
-                    onChange={(v) => setConfig({...config, qrColor: v})} 
-                  />
-                  <ColorInput 
-                    label="Background" 
-                    value={config.qrBgColor} 
-                    onChange={(v) => setConfig({...config, qrBgColor: v})} 
-                  />
-                </div>
-              </div>
+            {/* Config Tabs */}
+            <div className="flex border-b border-slate-800 bg-[#0f172a]/50">
+               <button 
+                 onClick={() => setConfigTab('general')}
+                 className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${configTab === 'general' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-slate-500 hover:text-slate-300'}`}
+               >
+                 General
+               </button>
+               <button 
+                 onClick={() => setConfigTab('appearance')}
+                 className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${configTab === 'appearance' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-slate-500 hover:text-slate-300'}`}
+               >
+                 Design
+               </button>
+               <button 
+                 onClick={() => setConfigTab('labels')}
+                 className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${configTab === 'labels' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-slate-500 hover:text-slate-300'}`}
+               >
+                 Content
+               </button>
             </div>
 
-            <div className="mt-auto pt-8">
+            <div className="flex-1 overflow-y-auto p-6 space-y-8">
+              {configTab === 'general' && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                  {/* Logo Upload */}
+                  <div>
+                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Institution Logo</h3>
+                    <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 bg-slate-900 border border-slate-700 rounded-xl flex items-center justify-center overflow-hidden">
+                          {config.logoUrl ? (
+                            <img src={config.logoUrl} alt="Logo" className="w-full h-full object-contain p-2" />
+                          ) : (
+                            <ImageIcon className="text-slate-600" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <input 
+                            type="file" 
+                            ref={logoInputRef}
+                            accept="image/png"
+                            onChange={handleLogoUpload}
+                            className="hidden"
+                          />
+                          <button 
+                            onClick={() => logoInputRef.current?.click()}
+                            className="w-full px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-bold border border-slate-700 transition-colors mb-2"
+                          >
+                            Upload PNG Logo
+                          </button>
+                          <p className="text-[10px] text-slate-500">Recommended: Transparent PNG, 200x200px</p>
+                        </div>
+                    </div>
+                  </div>
+
+                  <ConfigInput 
+                    label="Institution Name" 
+                    value={config.schoolName} 
+                    onChange={(v) => setConfig({...config, schoolName: v})} 
+                  />
+                  <ConfigInput 
+                    label="Address" 
+                    value={config.schoolAddress} 
+                    onChange={(v) => setConfig({...config, schoolAddress: v})} 
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <ConfigInput 
+                      label="Issued Year" 
+                      value={config.issuedYear} 
+                      onChange={(v) => setConfig({...config, issuedYear: v})} 
+                    />
+                    <ConfigInput 
+                      label="Valid Until" 
+                      value={config.validUntil} 
+                      onChange={(v) => setConfig({...config, validUntil: v})} 
+                    />
+                  </div>
+                </div>
+              )}
+
+              {configTab === 'appearance' && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+                   {/* Colors */}
+                   <div className="space-y-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Palette size={16} className="text-blue-500" />
+                        <h3 className="text-sm font-bold text-white uppercase tracking-wider">Color Scheme</h3>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 gap-4">
+                         <ColorInput 
+                            label="Card Background" 
+                            value={config.cardBgColor} 
+                            onChange={(v) => setConfig({...config, cardBgColor: v})} 
+                          />
+                          <ColorInput 
+                            label="Text Color" 
+                            value={config.textColor} 
+                            onChange={(v) => setConfig({...config, textColor: v})} 
+                          />
+                          <ColorInput 
+                            label="Accent Color" 
+                            value={config.accentColor} 
+                            onChange={(v) => setConfig({...config, accentColor: v})} 
+                          />
+                      </div>
+                   </div>
+
+                   {/* Pattern Toggle */}
+                   <div className="space-y-4 pt-4 border-t border-slate-800">
+                      <div className="flex items-center gap-2 mb-2">
+                         <ImageIcon size={16} className="text-blue-500" />
+                         <h3 className="text-sm font-bold text-white uppercase tracking-wider">Texture</h3>
+                      </div>
+                      <div className="flex items-center justify-between bg-slate-900 border border-slate-800 p-3 rounded-xl">
+                          <span className="text-sm font-medium text-slate-300">Background Pattern</span>
+                          <Toggle 
+                            checked={config.showPattern} 
+                            onChange={(c) => setConfig({...config, showPattern: c})} 
+                          />
+                      </div>
+                   </div>
+
+                   {/* QR Styling */}
+                   <div className="space-y-4 pt-4 border-t border-slate-800">
+                      <div className="flex items-center gap-2 mb-2">
+                         <div className="w-4 h-4 bg-white rounded-sm"></div>
+                         <h3 className="text-sm font-bold text-white uppercase tracking-wider">QR Code</h3>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <ColorInput 
+                          label="Dots Color" 
+                          value={config.qrColor} 
+                          onChange={(v) => setConfig({...config, qrColor: v})} 
+                        />
+                        <ColorInput 
+                          label="Background" 
+                          value={config.qrBgColor} 
+                          onChange={(v) => setConfig({...config, qrBgColor: v})} 
+                        />
+                      </div>
+                   </div>
+                </div>
+              )}
+
+              {configTab === 'labels' && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                   {/* Field Labels */}
+                   <div className="space-y-4">
+                      <div className="flex items-center gap-2 mb-2">
+                         <Type size={16} className="text-blue-500" />
+                         <h3 className="text-sm font-bold text-white uppercase tracking-wider">Field Labels</h3>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                         <ConfigInput 
+                           label="Class Label" 
+                           value={config.labelClass} 
+                           onChange={(v) => setConfig({...config, labelClass: v})} 
+                         />
+                         <ConfigInput 
+                           label="Section Label" 
+                           value={config.labelSection} 
+                           onChange={(v) => setConfig({...config, labelSection: v})} 
+                         />
+                         <ConfigInput 
+                           label="ID Label" 
+                           value={config.labelId} 
+                           onChange={(v) => setConfig({...config, labelId: v})} 
+                         />
+                         <ConfigInput 
+                           label="Contact Label" 
+                           value={config.labelContact} 
+                           onChange={(v) => setConfig({...config, labelContact: v})} 
+                         />
+                      </div>
+                   </div>
+
+                   {/* Visibility */}
+                   <div className="space-y-4 pt-4 border-t border-slate-800">
+                      <div className="flex items-center gap-2 mb-2">
+                         <Eye size={16} className="text-blue-500" />
+                         <h3 className="text-sm font-bold text-white uppercase tracking-wider">Visibility</h3>
+                      </div>
+                      <div className="flex items-center justify-between bg-slate-900 border border-slate-800 p-3 rounded-xl">
+                          <span className="text-sm font-medium text-slate-300">Show Contact Info</span>
+                          <Toggle 
+                            checked={config.showContact} 
+                            onChange={(c) => setConfig({...config, showContact: c})} 
+                          />
+                      </div>
+                   </div>
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-slate-800 bg-[#0c1322]">
               <button 
                 onClick={() => setIsConfigOpen(false)}
-                className="w-full py-4 bg-blue-600 hover:bg-blue-500 rounded-2xl font-black text-lg transition-all"
+                className="w-full py-4 bg-blue-600 hover:bg-blue-500 rounded-2xl font-black text-lg transition-all shadow-lg shadow-blue-900/20"
               >
-                Apply Changes
+                Done
               </button>
             </div>
           </div>
@@ -465,6 +602,15 @@ const ColorInput: React.FC<{ label: string; value: string; onChange: (v: string)
       />
     </div>
   </div>
+);
+
+const Toggle: React.FC<{ checked: boolean; onChange: (c: boolean) => void }> = ({ checked, onChange }) => (
+  <button 
+    onClick={() => onChange(!checked)}
+    className={`w-12 h-6 rounded-full transition-colors relative ${checked ? 'bg-blue-600' : 'bg-slate-700'}`}
+  >
+    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${checked ? 'left-7' : 'left-1'}`} />
+  </button>
 );
 
 export default App;

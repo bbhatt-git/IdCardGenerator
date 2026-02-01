@@ -15,4 +15,19 @@ export interface CardConfig {
   qrColor: string;
   qrBgColor: string;
   logoUrl: string;
+
+  // Visual Customization
+  cardBgColor: string;
+  accentColor: string;
+  textColor: string;
+  showPattern: boolean;
+
+  // Label Customization
+  labelClass: string;
+  labelSection: string;
+  labelId: string;
+  labelContact: string;
+
+  // Field Visibility
+  showContact: boolean;
 }
