@@ -70,7 +70,7 @@ const App: React.FC = () => {
 
     // Ensure fonts and images are ready
     await document.fonts.ready;
-    await new Promise(resolve => setTimeout(resolve, 500)); // Buffer time for images
+    await new Promise(resolve => setTimeout(resolve, 500)); // Buffer time
 
     try {
       const doc = new jsPDF({
@@ -79,85 +79,98 @@ const App: React.FC = () => {
         format: 'a4'
       });
 
-      // A4 Dimensions: 210mm x 297mm
-      // Card Standard (CR80): 54mm x 85.6mm (approx)
-      const CARD_WIDTH = 54;
-      const CARD_HEIGHT = 85.6; 
+      // User requested CR100 Size: 70mm x 100mm
+      const CARD_WIDTH = 70;
+      const CARD_HEIGHT = 100; 
       
       const PAGE_WIDTH = 210;
       const PAGE_HEIGHT = 297;
       
-      const HORIZONTAL_GAP = 10;
-      const VERTICAL_GAP = 10;
-      const MARGIN_TOP = 15;
+      const GAP = 0; // No gap for easy fold/cut
       
-      // Calculate Centered Margin Left
-      // Row Content: [Front] [Gap] [Back]
-      const ROW_WIDTH = (CARD_WIDTH * 2) + HORIZONTAL_GAP;
-      const MARGIN_LEFT = (PAGE_WIDTH - ROW_WIDTH) / 2;
+      // Calculate Centering for 1 Pair (Front + Back)
+      const CONTENT_WIDTH = (CARD_WIDTH * 2) + GAP;
+      const MARGIN_LEFT = (PAGE_WIDTH - CONTENT_WIDTH) / 2;
+      const MARGIN_TOP = (PAGE_HEIGHT - CARD_HEIGHT) / 2;
 
-      let currentY = MARGIN_TOP;
-      let itemsOnPage = 0;
+      const drawCropMarks = (x: number, y: number, w: number, h: number) => {
+        const len = 5; // length of crop mark line
+        const offset = 2; // distance from corner
+        doc.setDrawColor(0, 0, 0); // Black
+        doc.setLineWidth(0.1);
+
+        // Top Left
+        doc.line(x - offset - len, y, x - offset, y); // Horizontal
+        doc.line(x, y - offset - len, x, y - offset); // Vertical
+
+        // Top Right
+        doc.line(x + w + offset, y, x + w + offset + len, y);
+        doc.line(x + w, y - offset - len, x + w, y - offset);
+
+        // Bottom Left
+        doc.line(x - offset - len, y + h, x - offset, y + h);
+        doc.line(x, y + h + offset, x, y + h + offset + len);
+
+        // Bottom Right
+        doc.line(x + w + offset, y + h, x + w + offset + len, y + h);
+        doc.line(x + w, y + h + offset, x + w, y + h + offset + len);
+      };
 
       for (let i = 0; i < students.length; i++) {
         setProgress(Math.round(((i + 1) / students.length) * 100));
         
+        // Add new page for every student except the first one
+        if (i > 0) {
+            doc.addPage();
+        }
+
         const wrapperElement = document.getElementById(`card-${i}`);
         if (!wrapperElement) continue;
 
-        // Find Front and Back elements within the wrapper
         const frontEl = wrapperElement.querySelector('.id-card-front') as HTMLElement;
         const backEl = wrapperElement.querySelector('.id-card-back') as HTMLElement;
 
-        if (!frontEl || !backEl) {
-            console.warn(`Could not find card parts for student ${i}`);
-            continue;
-        }
+        if (!frontEl || !backEl) continue;
 
         try {
+          // Capture settings matching the aspect ratio 7:10 (350:500)
           const commonOptions = {
             quality: 1.0,
-            pixelRatio: 3, // High resolution for print
+            pixelRatio: 4, // High resolution for print
             cacheBust: true,
             backgroundColor: 'transparent',
-            // Force dimensions to prevent layout shifts during capture
-            width: 320, 
-            height: 504,
-            style: {
-                transform: 'none',
-                margin: '0',
-            }
+            width: 350, 
+            height: 500,
+            style: { transform: 'none', margin: '0' }
           };
 
           const frontDataUrl = await toPng(frontEl, commonOptions);
           const backDataUrl = await toPng(backEl, commonOptions);
 
-          // Check if we need a new page
-          // We can fit approx 3 rows per page (3 * (85.6 + 10) = ~287mm) which is tight but fits if margins are small. 
-          // Let's safe limit to 3 rows.
-          if (itemsOnPage >= 3) {
-            doc.addPage();
-            currentY = MARGIN_TOP;
-            itemsOnPage = 0;
-          }
+          const frontX = MARGIN_LEFT;
+          const backX = MARGIN_LEFT + CARD_WIDTH + GAP;
+          const y = MARGIN_TOP;
 
-          // Add Front Image
-          doc.addImage(frontDataUrl, 'PNG', MARGIN_LEFT, currentY, CARD_WIDTH, CARD_HEIGHT);
+          // Add Images
+          doc.addImage(frontDataUrl, 'PNG', frontX, y, CARD_WIDTH, CARD_HEIGHT);
+          doc.addImage(backDataUrl, 'PNG', backX, y, CARD_WIDTH, CARD_HEIGHT);
 
-          // Add Back Image (Right side)
-          doc.addImage(backDataUrl, 'PNG', MARGIN_LEFT + CARD_WIDTH + HORIZONTAL_GAP, currentY, CARD_WIDTH, CARD_HEIGHT);
+          // Draw Crop Marks around the combined block
+          drawCropMarks(frontX, y, CARD_WIDTH, CARD_HEIGHT); // Left card marks
+          drawCropMarks(backX, y, CARD_WIDTH, CARD_HEIGHT);  // Right card marks
 
-          // Draw Cut Guidelines (Optional, faint grey lines)
+          // Draw a light dashed line in the middle to indicate fold/cut
           doc.setDrawColor(200, 200, 200);
-          doc.setLineWidth(0.1);
-          doc.rect(MARGIN_LEFT, currentY, CARD_WIDTH, CARD_HEIGHT); // Front Border
-          doc.rect(MARGIN_LEFT + CARD_WIDTH + HORIZONTAL_GAP, currentY, CARD_WIDTH, CARD_HEIGHT); // Back Border
+          doc.setLineDashPattern([2, 2], 0);
+          doc.line(backX, y, backX, y + CARD_HEIGHT);
+          doc.setLineDashPattern([], 0); // Reset
 
-          // Increment Position
-          currentY += CARD_HEIGHT + VERTICAL_GAP;
-          itemsOnPage++;
+          // Label text for context (outside crop area)
+          doc.setFontSize(8);
+          doc.setTextColor(150, 150, 150);
+          doc.text(`Student: ${students[i].name} (${students[i].studentId})`, MARGIN_LEFT, y - 5);
+
           
-          // Brief pause to prevent UI freezing
           await new Promise(resolve => setTimeout(resolve, 50));
 
         } catch (err) {
@@ -165,7 +178,7 @@ const App: React.FC = () => {
         }
       }
 
-      doc.save('QwickAttend_ID_Cards.pdf');
+      doc.save('QwickAttend_ID_Cards_CR100.pdf');
 
     } catch (error) {
       console.error("PDF Generation failed", error);
@@ -199,7 +212,7 @@ const App: React.FC = () => {
                 className="flex items-center gap-2 px-6 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm font-bold transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-wait min-w-[160px] justify-center"
               >
                 {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
-                {isGenerating ? `Processing ${progress}%` : 'Download PDF'}
+                {isGenerating ? `Processing ${progress}%` : 'Download PDF (CR100)'}
               </button>
               <button 
                 onClick={clearData}
