@@ -68,6 +68,9 @@ const App: React.FC = () => {
     setIsGenerating(true);
     setProgress(0);
 
+    // Wait for fonts to be ready to ensure text renders
+    await document.fonts.ready;
+
     try {
       const doc = new jsPDF({
         orientation: 'portrait',
@@ -89,18 +92,10 @@ const App: React.FC = () => {
         if (!element) continue;
 
         try {
-          // Use more robust options for html-to-image
           const dataUrl = await toPng(element, { 
-            quality: 1, 
+            quality: 0.95,
             pixelRatio: 2,
-            backgroundColor: 'rgba(0,0,0,0)',
             cacheBust: true,
-            // Style overrides to ensure transparency during capture
-            style: {
-              backgroundColor: 'transparent',
-              boxShadow: 'none',
-              transform: 'none'
-            }
           });
 
           if (!dataUrl || dataUrl === 'data:,') {
@@ -120,8 +115,8 @@ const App: React.FC = () => {
           doc.addImage(dataUrl, 'PNG', (pageWidth - targetImgWidth) / 2, yOffset, targetImgWidth, pdfHeight);
           yOffset += pdfHeight + 8;
           
-          // Brief pause to keep UI responsive and ensure memory management
-          await new Promise(resolve => setTimeout(resolve, 50));
+          // Brief pause to allow UI updates and garbage collection
+          await new Promise(resolve => setTimeout(resolve, 100));
 
         } catch (err) {
           console.error(`Error generating card ${i}`, err);
