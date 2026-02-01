@@ -77,6 +77,11 @@ const App: React.FC = () => {
       });
       setStudents(data);
       setActiveTab('list');
+      
+      // Reset the file input so the same file can be selected again if needed
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     };
     reader.readAsText(file);
   };
@@ -308,6 +313,15 @@ const App: React.FC = () => {
       </nav>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Hidden File Input - Always rendered so refs work */}
+        <input 
+          type="file" 
+          ref={fileInputRef}
+          className="hidden" 
+          accept=".csv" 
+          onChange={handleCsvUpload}
+        />
+
         {/* Upload State */}
         {activeTab === 'upload' && students.length === 0 && (
           <div className="max-w-2xl mx-auto mt-20 text-center">
@@ -319,14 +333,6 @@ const App: React.FC = () => {
               <p className="text-slate-400 mb-8 max-w-md mx-auto">
                 Upload your student CSV file to batch-generate high-quality ID cards.
               </p>
-              
-              <input 
-                type="file" 
-                ref={fileInputRef}
-                className="hidden" 
-                accept=".csv" 
-                onChange={handleCsvUpload}
-              />
               
               <button 
                 onClick={() => fileInputRef.current?.click()}
