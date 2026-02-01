@@ -2,7 +2,7 @@
 import React from 'react';
 import QRCodePattern from './QRCodePattern';
 import { Student, CardConfig } from '../types';
-import { QALogo } from './Logo';
+import { RemoteImage } from './Logo';
 
 interface IDCardProps {
   student: Student;
@@ -99,7 +99,7 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
         {/* Header Logo Area */}
         <div className="relative z-10 flex flex-col items-center w-full mt-8">
           <div className="mb-4 opacity-90 p-4 bg-white/5 rounded-2xl border border-white/5">
-             <QALogo className="w-20 h-20" />
+             <RemoteImage src={config.logoUrl} alt="Logo" className="w-20 h-20" />
           </div>
           <h3 className="text-white font-black tracking-[0.3em] text-lg">QWICKATTEND</h3>
           <div className="h-1 w-12 bg-blue-600 rounded-full mt-4"></div>

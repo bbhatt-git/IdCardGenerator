@@ -6,6 +6,12 @@ const useImageBase64 = (url: string) => {
   const [dataSrc, setDataSrc] = useState<string>('');
 
   useEffect(() => {
+    // If it's already a data URL, use it directly
+    if (url.startsWith('data:')) {
+      setDataSrc(url);
+      return;
+    }
+
     let active = true;
     const load = async () => {
       try {
@@ -31,15 +37,15 @@ const useImageBase64 = (url: string) => {
   return dataSrc;
 };
 
-const RemoteImage: React.FC<{ src: string; alt: string; className?: string }> = ({ src, alt, className }) => {
+export const RemoteImage: React.FC<{ src: string; alt: string; className?: string }> = ({ src, alt, className }) => {
   const base64 = useImageBase64(src);
   
-  // Render a placeholder of the same size while loading to prevent layout shift
-  if (!base64) return <div className={`bg-transparent ${className}`} />; 
+  // Render a placeholder or the original source while loading
+  if (!base64 && !src) return <div className={`bg-transparent ${className}`} />; 
   
   return (
     <img 
-      src={base64} 
+      src={base64 || src} 
       alt={alt} 
       className={`object-contain ${className}`} 
     />

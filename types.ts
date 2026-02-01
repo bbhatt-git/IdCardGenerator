@@ -14,4 +14,5 @@ export interface CardConfig {
   schoolAddress: string;
   qrColor: string;
   qrBgColor: string;
+  logoUrl: string;
 }

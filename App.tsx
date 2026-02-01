@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Student, CardConfig } from './types';
 import IDCard from './components/IDCard';
-import { Upload, FileSpreadsheet, Download, Plus, Trash2, Edit2, X, Loader2 } from 'lucide-react';
+import { Upload, FileSpreadsheet, Download, Plus, Trash2, Edit2, X, Loader2, Image as ImageIcon } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { toPng } from 'html-to-image';
 
@@ -13,6 +13,7 @@ const DEFAULT_CONFIG: CardConfig = {
   validUntil: 'CHAITRA 2082',
   qrColor: '#000000',
   qrBgColor: '#FFFFFF',
+  logoUrl: 'https://raw.githubusercontent.com/bbhatt-git/IdCardGenerator/refs/heads/main/public/qa.png',
 };
 
 const App: React.FC = () => {
@@ -23,6 +24,7 @@ const App: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   // Load fonts for the page
   useEffect(() => {
@@ -54,6 +56,23 @@ const App: React.FC = () => {
       setActiveTab('list');
     };
     reader.readAsText(file);
+  };
+
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'image/png') {
+        alert('Please upload a PNG image.');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      setConfig(prev => ({ ...prev, logoUrl: result }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const clearData = () => {
@@ -331,6 +350,36 @@ const App: React.FC = () => {
             </div>
 
             <div className="space-y-6 overflow-y-auto pr-2 flex-1">
+              {/* Logo Upload */}
+              <div className="mb-6">
+                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Card Logo</h3>
+                 <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-slate-900 border border-slate-700 rounded-xl flex items-center justify-center overflow-hidden">
+                       {config.logoUrl ? (
+                         <img src={config.logoUrl} alt="Logo" className="w-full h-full object-contain p-2" />
+                       ) : (
+                         <ImageIcon className="text-slate-600" />
+                       )}
+                    </div>
+                    <div className="flex-1">
+                      <input 
+                        type="file" 
+                        ref={logoInputRef}
+                        accept="image/png"
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                      />
+                      <button 
+                        onClick={() => logoInputRef.current?.click()}
+                        className="w-full px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-bold border border-slate-700 transition-colors mb-2"
+                      >
+                        Upload PNG Logo
+                      </button>
+                      <p className="text-[10px] text-slate-500">Recommended: Transparent PNG, 200x200px</p>
+                    </div>
+                 </div>
+              </div>
+
               <ConfigInput 
                 label="Institution Name" 
                 value={config.schoolName} 
