@@ -79,29 +79,35 @@ const App: React.FC = () => {
         format: 'a4'
       });
 
-      // User requested CR100 Size: 70mm x 100mm
-      const CARD_WIDTH = 70;
-      const CARD_HEIGHT = 100; 
+      // Requested Size: 80mm x 136mm
+      const CARD_WIDTH = 80;
+      const CARD_HEIGHT = 136; 
       
       const PAGE_WIDTH = 210;
       const PAGE_HEIGHT = 297;
       
-      const GAP = 0; // No gap for easy fold/cut
+      const GAP_X = 10; // Gap between Front and Back of the same student
+      const GAP_Y = 10; // Vertical gap between Student 1 and Student 2 rows
       
-      // Calculate Centering for 1 Pair (Front + Back)
-      const CONTENT_WIDTH = (CARD_WIDTH * 2) + GAP;
-      const MARGIN_LEFT = (PAGE_WIDTH - CONTENT_WIDTH) / 2;
-      const MARGIN_TOP = (PAGE_HEIGHT - CARD_HEIGHT) / 2;
+      // Calculate layout
+      // We want 2 students per page. Each student takes a row.
+      // Row content: [Front] [Gap] [Back]
+      const ROW_WIDTH = (CARD_WIDTH * 2) + GAP_X;
+      const MARGIN_LEFT = (PAGE_WIDTH - ROW_WIDTH) / 2;
+      
+      // Vertical centering for 2 rows
+      const TOTAL_CONTENT_HEIGHT = (CARD_HEIGHT * 2) + GAP_Y;
+      const MARGIN_TOP = (PAGE_HEIGHT - TOTAL_CONTENT_HEIGHT) / 2;
 
       const drawCropMarks = (x: number, y: number, w: number, h: number) => {
-        const len = 5; // length of crop mark line
+        const len = 4; // length of crop mark line
         const offset = 2; // distance from corner
         doc.setDrawColor(0, 0, 0); // Black
         doc.setLineWidth(0.1);
 
         // Top Left
-        doc.line(x - offset - len, y, x - offset, y); // Horizontal
-        doc.line(x, y - offset - len, x, y - offset); // Vertical
+        doc.line(x - offset - len, y, x - offset, y); 
+        doc.line(x, y - offset - len, x, y - offset); 
 
         // Top Right
         doc.line(x + w + offset, y, x + w + offset + len, y);
@@ -119,8 +125,9 @@ const App: React.FC = () => {
       for (let i = 0; i < students.length; i++) {
         setProgress(Math.round(((i + 1) / students.length) * 100));
         
-        // Add new page for every student except the first one
-        if (i > 0) {
+        // Every 2 students, start a new page.
+        // i % 2 === 0 means it's the start of a page (unless it's the very first one).
+        if (i > 0 && i % 2 === 0) {
             doc.addPage();
         }
 
@@ -133,44 +140,46 @@ const App: React.FC = () => {
         if (!frontEl || !backEl) continue;
 
         try {
-          // Capture settings matching the aspect ratio 7:10 (350:500)
+          // Capture settings matching the aspect ratio 80:136 (400:680)
           const commonOptions = {
             quality: 1.0,
             pixelRatio: 4, // High resolution for print
             cacheBust: true,
             backgroundColor: 'transparent',
-            width: 350, 
-            height: 500,
+            width: 400, 
+            height: 680,
             style: { transform: 'none', margin: '0' }
           };
 
           const frontDataUrl = await toPng(frontEl, commonOptions);
           const backDataUrl = await toPng(backEl, commonOptions);
 
+          // Determine position
+          const rowIndex = i % 2; // 0 for top row, 1 for bottom row
+          const y = MARGIN_TOP + (rowIndex * (CARD_HEIGHT + GAP_Y));
+          
           const frontX = MARGIN_LEFT;
-          const backX = MARGIN_LEFT + CARD_WIDTH + GAP;
-          const y = MARGIN_TOP;
+          const backX = MARGIN_LEFT + CARD_WIDTH + GAP_X;
 
           // Add Images
           doc.addImage(frontDataUrl, 'PNG', frontX, y, CARD_WIDTH, CARD_HEIGHT);
           doc.addImage(backDataUrl, 'PNG', backX, y, CARD_WIDTH, CARD_HEIGHT);
 
-          // Draw Crop Marks around the combined block
-          drawCropMarks(frontX, y, CARD_WIDTH, CARD_HEIGHT); // Left card marks
-          drawCropMarks(backX, y, CARD_WIDTH, CARD_HEIGHT);  // Right card marks
+          // Draw Crop Marks
+          drawCropMarks(frontX, y, CARD_WIDTH, CARD_HEIGHT);
+          drawCropMarks(backX, y, CARD_WIDTH, CARD_HEIGHT);
 
-          // Draw a light dashed line in the middle to indicate fold/cut
+          // Fold line between front and back
           doc.setDrawColor(200, 200, 200);
           doc.setLineDashPattern([2, 2], 0);
-          doc.line(backX, y, backX, y + CARD_HEIGHT);
+          doc.line(backX - (GAP_X/2), y, backX - (GAP_X/2), y + CARD_HEIGHT);
           doc.setLineDashPattern([], 0); // Reset
 
-          // Label text for context (outside crop area)
+          // Label text
           doc.setFontSize(8);
           doc.setTextColor(150, 150, 150);
-          doc.text(`Student: ${students[i].name} (${students[i].studentId})`, MARGIN_LEFT, y - 5);
+          doc.text(`Student: ${students[i].name} (${students[i].studentId})`, MARGIN_LEFT, y - 3);
 
-          
           await new Promise(resolve => setTimeout(resolve, 50));
 
         } catch (err) {
@@ -178,7 +187,7 @@ const App: React.FC = () => {
         }
       }
 
-      doc.save('QwickAttend_ID_Cards_CR100.pdf');
+      doc.save('QwickAttend_ID_Cards_80x136.pdf');
 
     } catch (error) {
       console.error("PDF Generation failed", error);
@@ -212,7 +221,7 @@ const App: React.FC = () => {
                 className="flex items-center gap-2 px-6 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm font-bold transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-wait min-w-[160px] justify-center"
               >
                 {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
-                {isGenerating ? `Processing ${progress}%` : 'Download PDF (CR100)'}
+                {isGenerating ? `Processing ${progress}%` : 'Download PDF (80x136mm)'}
               </button>
               <button 
                 onClick={clearData}
