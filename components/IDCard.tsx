@@ -50,22 +50,22 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
         
         {/* Header - Row Layout with Logo and Text */}
         <div className="pt-10 px-5 pb-2 flex flex-row items-center gap-4 relative z-10 w-full">
-           {/* Logo Container */}
-           <div className="shrink-0 w-16 h-16 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 p-2 flex items-center justify-center shadow-sm">
+           {/* Logo Container - Clean, no border/background */}
+           <div className="shrink-0 w-16 h-16 flex items-center justify-center">
               <RemoteImage src={config.logoUrl} alt="School Logo" className="w-full h-full object-contain" />
            </div>
            
-           {/* Text Container */}
-           <div className="flex flex-col items-start flex-1 min-w-0">
+           {/* Text Container - Left Aligned */}
+           <div className="flex flex-col items-start justify-center flex-1 min-w-0">
               <h1 
                 className="text-[15px] font-black leading-tight tracking-wide uppercase font-inter drop-shadow-lg text-left w-full break-words"
                 style={{ color: config.textColor }}
               >
                 {config.schoolName}
               </h1>
-              <div className="h-0.5 w-10 rounded-full my-1.5" style={{ backgroundColor: config.accentColor }}></div>
+              {/* Separator line removed as requested */}
               <p 
-                className="text-[9px] font-bold tracking-[0.1em] uppercase text-left leading-tight opacity-90"
+                className="text-[9px] font-bold tracking-[0.1em] uppercase text-left leading-tight opacity-90 mt-1"
                 style={{ color: config.textColor }}
               >
                 {config.schoolAddress}
@@ -116,26 +116,26 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
               <DetailItem 
                 label={config.labelClass} 
                 value={student.class} 
-                labelColor={config.textColor} 
+                labelColor={config.labelColor} 
                 valueColor={config.detailsColor} 
               />
               <DetailItem 
                 label={config.labelSection} 
                 value={student.section} 
-                labelColor={config.textColor} 
+                labelColor={config.labelColor} 
                 valueColor={config.detailsColor} 
               />
               <DetailItem 
                 label={config.labelId} 
                 value={student.studentId} 
-                labelColor={config.textColor} 
+                labelColor={config.labelColor} 
                 valueColor={config.detailsColor} 
               />
               {config.showContact && (
                  <DetailItem 
                     label={config.labelContact} 
                     value={student.contact || "N/A"} 
-                    labelColor={config.textColor} 
+                    labelColor={config.labelColor} 
                     valueColor={config.detailsColor} 
                   />
               )}
@@ -143,11 +143,11 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
             {/* Validity Bar */}
             <div className="mt-5 pt-4 border-t border-slate-700/50 flex justify-between items-end">
                <div className="flex flex-col">
-                  <span className="text-[9px] font-black uppercase tracking-widest mb-0.5" style={{ color: config.textColor, opacity: 0.7 }}>{config.labelIssued}</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest mb-0.5" style={{ color: config.labelColor, opacity: 0.7 }}>{config.labelIssued}</span>
                   <span className="text-[12px] font-bold" style={{ color: config.detailsColor, opacity: 0.9 }}>{config.issuedYear}</span>
                </div>
                <div className="flex flex-col text-right">
-                  <span className="text-[9px] font-black uppercase tracking-widest mb-0.5" style={{ color: config.textColor, opacity: 0.7 }}>{config.labelValid}</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest mb-0.5" style={{ color: config.labelColor, opacity: 0.7 }}>{config.labelValid}</span>
                   <span className="text-[12px] font-bold" style={{ color: config.accentColor }}>{config.validUntil}</span>
                </div>
             </div>
@@ -169,7 +169,7 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
         {/* Header Logo Area */}
         <div className="relative z-10 flex flex-col items-center w-full mt-8">
           <div className="mb-4 opacity-90 p-4 bg-white/5 rounded-2xl border border-white/5">
-             <RemoteImage src={config.logoUrl} alt="Logo" className="w-20 h-20" />
+             <RemoteImage src={config.backLogoUrl} alt="Logo" className="w-20 h-20" />
           </div>
           <h3 className="font-black tracking-[0.3em] text-lg" style={{ color: config.backTextColor }}>QWICKATTEND</h3>
           <div className="h-1 w-12 rounded-full mt-4" style={{ backgroundColor: config.accentColor }}></div>

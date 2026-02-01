@@ -14,13 +14,15 @@ export interface CardConfig {
   schoolAddress: string;
   qrColor: string;
   qrBgColor: string;
-  logoUrl: string;
+  logoUrl: string;       // Front (School) Logo
+  backLogoUrl: string;   // Back (QwickAttend) Logo
 
   // Visual Customization
   cardBgColor: string;
   accentColor: string;
   textColor: string;      // Main Front Text (Name, School)
   detailsColor: string;   // Content Text (Class, Section, ID, Contact)
+  labelColor: string;     // Label Text (CLASS, SECTION, etc.)
   backTextColor: string;  // Back Side Text (Header, Disclaimer)
   showPattern: boolean;
 

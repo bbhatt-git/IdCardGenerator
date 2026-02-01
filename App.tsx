@@ -13,12 +13,14 @@ const DEFAULT_CONFIG: CardConfig = {
   validUntil: 'CHAITRA 2082',
   qrColor: '#000000',
   qrBgColor: '#FFFFFF',
-  logoUrl: 'https://raw.githubusercontent.com/bbhatt-git/IdCardGenerator/refs/heads/main/public/qa.png',
+  logoUrl: 'https://raw.githubusercontent.com/bbhatt-git/IdCardGenerator/refs/heads/main/public/sarc.png',
+  backLogoUrl: 'https://raw.githubusercontent.com/bbhatt-git/IdCardGenerator/refs/heads/main/public/qa.png',
   
   cardBgColor: '#0f172a',
   accentColor: '#3b82f6', // blue-500
   textColor: '#ffffff',
   detailsColor: '#ffffff',
+  labelColor: '#94a3b8', // slate-400
   backTextColor: '#ffffff',
   showPattern: true,
 
@@ -44,6 +46,7 @@ const App: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const backLogoInputRef = useRef<HTMLInputElement>(null);
   const [configTab, setConfigTab] = useState<'general' | 'appearance' | 'labels'>('general');
 
   // Load fonts for the page
@@ -91,6 +94,23 @@ const App: React.FC = () => {
     reader.onload = (e) => {
       const result = e.target?.result as string;
       setConfig(prev => ({ ...prev, logoUrl: result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleBackLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'image/png') {
+        alert('Please upload a PNG image.');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      setConfig(prev => ({ ...prev, backLogoUrl: result }));
     };
     reader.readAsDataURL(file);
   };
@@ -394,13 +414,13 @@ const App: React.FC = () => {
             <div className="flex-1 overflow-y-auto p-6 space-y-8">
               {configTab === 'general' && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                  {/* Logo Upload */}
+                  {/* Front Logo Upload */}
                   <div>
-                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">School Logo</h3>
+                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Front: School Logo</h3>
                     <div className="flex items-center gap-4">
                         <div className="w-16 h-16 bg-slate-900 border border-slate-700 rounded-xl flex items-center justify-center overflow-hidden">
                           {config.logoUrl ? (
-                            <img src={config.logoUrl} alt="Logo" className="w-full h-full object-contain p-2" />
+                            <img src={config.logoUrl} alt="School Logo" className="w-full h-full object-contain p-2" />
                           ) : (
                             <ImageIcon className="text-slate-600" />
                           )}
@@ -419,7 +439,35 @@ const App: React.FC = () => {
                           >
                             Upload PNG Logo
                           </button>
-                          <p className="text-[10px] text-slate-500">Recommended: Transparent PNG, 200x200px</p>
+                        </div>
+                    </div>
+                  </div>
+
+                  {/* Back Logo Upload */}
+                  <div>
+                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Back: QwickAttend Logo</h3>
+                    <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 bg-slate-900 border border-slate-700 rounded-xl flex items-center justify-center overflow-hidden">
+                          {config.backLogoUrl ? (
+                            <img src={config.backLogoUrl} alt="Back Logo" className="w-full h-full object-contain p-2" />
+                          ) : (
+                            <ImageIcon className="text-slate-600" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <input 
+                            type="file" 
+                            ref={backLogoInputRef}
+                            accept="image/png"
+                            onChange={handleBackLogoUpload}
+                            className="hidden"
+                          />
+                          <button 
+                            onClick={() => backLogoInputRef.current?.click()}
+                            className="w-full px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-bold border border-slate-700 transition-colors mb-2"
+                          >
+                            Upload PNG Logo
+                          </button>
                         </div>
                     </div>
                   </div>
@@ -479,6 +527,11 @@ const App: React.FC = () => {
                             label="Details Content (Class/ID/etc)" 
                             value={config.detailsColor} 
                             onChange={(v) => setConfig({...config, detailsColor: v})} 
+                          />
+                          <ColorInput 
+                            label="Label Text (CLASS/SECTION tags)" 
+                            value={config.labelColor} 
+                            onChange={(v) => setConfig({...config, labelColor: v})} 
                           />
                           <ColorInput 
                             label="Back Side Text" 
