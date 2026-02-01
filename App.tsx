@@ -68,8 +68,9 @@ const App: React.FC = () => {
     setIsGenerating(true);
     setProgress(0);
 
-    // Wait for fonts to be ready to ensure text renders
+    // Ensure fonts and images are ready
     await document.fonts.ready;
+    await new Promise(resolve => setTimeout(resolve, 500)); // Buffer time for images
 
     try {
       const doc = new jsPDF({
@@ -78,45 +79,86 @@ const App: React.FC = () => {
         format: 'a4'
       });
 
-      const pageWidth = 210;
-      const pageHeight = 297;
-      const margin = 10;
-      const targetImgWidth = 180; 
+      // A4 Dimensions: 210mm x 297mm
+      // Card Standard (CR80): 54mm x 85.6mm (approx)
+      const CARD_WIDTH = 54;
+      const CARD_HEIGHT = 85.6; 
       
-      let yOffset = margin;
+      const PAGE_WIDTH = 210;
+      const PAGE_HEIGHT = 297;
       
+      const HORIZONTAL_GAP = 10;
+      const VERTICAL_GAP = 10;
+      const MARGIN_TOP = 15;
+      
+      // Calculate Centered Margin Left
+      // Row Content: [Front] [Gap] [Back]
+      const ROW_WIDTH = (CARD_WIDTH * 2) + HORIZONTAL_GAP;
+      const MARGIN_LEFT = (PAGE_WIDTH - ROW_WIDTH) / 2;
+
+      let currentY = MARGIN_TOP;
+      let itemsOnPage = 0;
+
       for (let i = 0; i < students.length; i++) {
         setProgress(Math.round(((i + 1) / students.length) * 100));
         
-        const element = document.getElementById(`card-${i}`);
-        if (!element) continue;
+        const wrapperElement = document.getElementById(`card-${i}`);
+        if (!wrapperElement) continue;
+
+        // Find Front and Back elements within the wrapper
+        const frontEl = wrapperElement.querySelector('.id-card-front') as HTMLElement;
+        const backEl = wrapperElement.querySelector('.id-card-back') as HTMLElement;
+
+        if (!frontEl || !backEl) {
+            console.warn(`Could not find card parts for student ${i}`);
+            continue;
+        }
 
         try {
-          const dataUrl = await toPng(element, { 
-            quality: 0.95,
-            pixelRatio: 2,
+          const commonOptions = {
+            quality: 1.0,
+            pixelRatio: 3, // High resolution for print
             cacheBust: true,
-          });
+            backgroundColor: 'transparent',
+            // Force dimensions to prevent layout shifts during capture
+            width: 320, 
+            height: 504,
+            style: {
+                transform: 'none',
+                margin: '0',
+            }
+          };
 
-          if (!dataUrl || dataUrl === 'data:,') {
-            console.error(`Failed to capture card ${i}`);
-            continue;
-          }
+          const frontDataUrl = await toPng(frontEl, commonOptions);
+          const backDataUrl = await toPng(backEl, commonOptions);
 
-          const imgProps = doc.getImageProperties(dataUrl);
-          const pdfHeight = (imgProps.height * targetImgWidth) / imgProps.width;
-
-          // Check for page break
-          if (yOffset + pdfHeight > pageHeight - margin) {
+          // Check if we need a new page
+          // We can fit approx 3 rows per page (3 * (85.6 + 10) = ~287mm) which is tight but fits if margins are small. 
+          // Let's safe limit to 3 rows.
+          if (itemsOnPage >= 3) {
             doc.addPage();
-            yOffset = margin;
+            currentY = MARGIN_TOP;
+            itemsOnPage = 0;
           }
 
-          doc.addImage(dataUrl, 'PNG', (pageWidth - targetImgWidth) / 2, yOffset, targetImgWidth, pdfHeight);
-          yOffset += pdfHeight + 8;
+          // Add Front Image
+          doc.addImage(frontDataUrl, 'PNG', MARGIN_LEFT, currentY, CARD_WIDTH, CARD_HEIGHT);
+
+          // Add Back Image (Right side)
+          doc.addImage(backDataUrl, 'PNG', MARGIN_LEFT + CARD_WIDTH + HORIZONTAL_GAP, currentY, CARD_WIDTH, CARD_HEIGHT);
+
+          // Draw Cut Guidelines (Optional, faint grey lines)
+          doc.setDrawColor(200, 200, 200);
+          doc.setLineWidth(0.1);
+          doc.rect(MARGIN_LEFT, currentY, CARD_WIDTH, CARD_HEIGHT); // Front Border
+          doc.rect(MARGIN_LEFT + CARD_WIDTH + HORIZONTAL_GAP, currentY, CARD_WIDTH, CARD_HEIGHT); // Back Border
+
+          // Increment Position
+          currentY += CARD_HEIGHT + VERTICAL_GAP;
+          itemsOnPage++;
           
-          // Brief pause to allow UI updates and garbage collection
-          await new Promise(resolve => setTimeout(resolve, 100));
+          // Brief pause to prevent UI freezing
+          await new Promise(resolve => setTimeout(resolve, 50));
 
         } catch (err) {
           console.error(`Error generating card ${i}`, err);
@@ -157,7 +199,7 @@ const App: React.FC = () => {
                 className="flex items-center gap-2 px-6 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm font-bold transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-wait min-w-[160px] justify-center"
               >
                 {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
-                {isGenerating ? `Generating ${progress}%` : 'Download PDF'}
+                {isGenerating ? `Processing ${progress}%` : 'Download PDF'}
               </button>
               <button 
                 onClick={clearData}
