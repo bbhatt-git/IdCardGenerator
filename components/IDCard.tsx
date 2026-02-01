@@ -1,4 +1,3 @@
-
 import React from 'react';
 import QRCodePattern from './QRCodePattern';
 import { Student, CardConfig } from '../types';
@@ -10,15 +9,27 @@ interface IDCardProps {
   id?: string;
 }
 
+// Inline SVG Pattern to ensure reliability in PDF generation (avoids CORS)
+const CubePattern = () => (
+  <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+    style={{ 
+      backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
+      backgroundSize: '20px 20px'
+    }} 
+  />
+);
+
 const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
   const [firstName, ...lastNameParts] = student.name.split(' ');
   const lastName = lastNameParts.join(' ');
 
   // Helper for applying styles with defaults
-  const cardStyle = {
+  const cardStyle: React.CSSProperties = {
     backgroundColor: config.cardBgColor,
     color: config.textColor,
     borderColor: 'rgba(30, 41, 59, 1)', // slate-800
+    printColorAdjust: 'exact',
+    WebkitPrintColorAdjust: 'exact',
   };
 
   const accentStyle = {
@@ -35,9 +46,7 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
       >
         
         {/* Background Elements */}
-        {config.showPattern && (
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none"></div>
-        )}
+        {config.showPattern && <CubePattern />}
         <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-slate-800/50 to-transparent pointer-events-none"></div>
         
         {/* Header - Text Only, Centered */}
@@ -107,11 +116,11 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
             {/* Validity Bar */}
             <div className="mt-5 pt-4 border-t border-slate-700/50 flex justify-between items-end">
                <div className="flex flex-col">
-                  <span className="text-[9px] font-black uppercase tracking-widest mb-0.5" style={{ color: config.textColor, opacity: 0.5 }}>ISSUED</span>
-                  <span className="text-[12px] font-bold" style={{ color: config.textColor, opacity: 0.8 }}>{config.issuedYear}</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest mb-0.5" style={{ color: config.textColor, opacity: 0.7 }}>{config.labelIssued}</span>
+                  <span className="text-[12px] font-bold" style={{ color: config.textColor, opacity: 0.9 }}>{config.issuedYear}</span>
                </div>
                <div className="flex flex-col text-right">
-                  <span className="text-[9px] font-black uppercase tracking-widest mb-0.5" style={{ color: config.textColor, opacity: 0.5 }}>VALID UNTIL</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest mb-0.5" style={{ color: config.textColor, opacity: 0.7 }}>{config.labelValid}</span>
                   <span className="text-[12px] font-bold" style={{ color: config.accentColor }}>{config.validUntil}</span>
                </div>
             </div>
@@ -158,9 +167,11 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
              </span>
           </div>
           
-          <p className="text-[11px] text-center leading-relaxed max-w-[280px] font-medium" style={{ color: config.textColor, opacity: 0.6 }}>
-            This card is the property of <span className="font-bold" style={{ color: config.textColor, opacity: 1 }}>{config.schoolName}</span>. 
-            If found, please return to the school administration.
+          <p 
+            className="text-[11px] text-center leading-relaxed max-w-[280px] font-medium" 
+            style={{ color: config.textColor, opacity: 0.8 }}
+          >
+            {config.disclaimerText}
           </p>
         </div>
       </div>
@@ -170,10 +181,10 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
 
 const DetailItem: React.FC<{ label: string; value: string; highlightColor?: string; textColor: string }> = ({ label, value, highlightColor, textColor }) => (
   <div className="flex flex-col">
-    <span className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: textColor, opacity: 0.5 }}>{label}</span>
+    <span className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: textColor, opacity: 0.7 }}>{label}</span>
     <span 
         className="text-[15px] font-bold truncate" 
-        style={{ color: highlightColor || textColor, opacity: highlightColor ? 1 : 0.9 }}
+        style={{ color: highlightColor || textColor, opacity: highlightColor ? 1 : 0.95 }}
     >
         {value}
     </span>

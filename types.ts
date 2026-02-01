@@ -27,6 +27,13 @@ export interface CardConfig {
   labelSection: string;
   labelId: string;
   labelContact: string;
+  
+  // New Date Labels
+  labelIssued: string;
+  labelValid: string;
+  
+  // Disclaimer
+  disclaimerText: string;
 
   // Field Visibility
   showContact: boolean;

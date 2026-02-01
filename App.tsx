@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Student, CardConfig } from './types';
 import IDCard from './components/IDCard';
-import { Upload, FileSpreadsheet, Download, Plus, Trash2, Edit2, X, Loader2, Image as ImageIcon, Palette, Type, Eye } from 'lucide-react';
+import { Upload, FileSpreadsheet, Download, Plus, Trash2, Edit2, X, Loader2, Image as ImageIcon, Palette, Type, Eye, FileText } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { toPng } from 'html-to-image';
 
@@ -24,6 +24,11 @@ const DEFAULT_CONFIG: CardConfig = {
   labelSection: 'SECTION',
   labelId: 'ID NO',
   labelContact: 'CONTACT',
+  
+  labelIssued: 'ISSUED',
+  labelValid: 'VALID UNTIL',
+  
+  disclaimerText: 'This card is the property of SARC EDUCATION FOUNDATION. If found, please return to the school administration.',
 
   showContact: true,
 };
@@ -536,6 +541,34 @@ const App: React.FC = () => {
                            value={config.labelContact} 
                            onChange={(v) => setConfig({...config, labelContact: v})} 
                          />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                         <ConfigInput 
+                           label="Issued Label" 
+                           value={config.labelIssued} 
+                           onChange={(v) => setConfig({...config, labelIssued: v})} 
+                         />
+                         <ConfigInput 
+                           label="Valid Label" 
+                           value={config.labelValid} 
+                           onChange={(v) => setConfig({...config, labelValid: v})} 
+                         />
+                      </div>
+                   </div>
+
+                   {/* Disclaimer */}
+                   <div className="space-y-4 pt-4 border-t border-slate-800">
+                      <div className="flex items-center gap-2 mb-2">
+                         <FileText size={16} className="text-blue-500" />
+                         <h3 className="text-sm font-bold text-white uppercase tracking-wider">Back Disclaimer</h3>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <textarea 
+                          value={config.disclaimerText} 
+                          onChange={(e) => setConfig({...config, disclaimerText: e.target.value})}
+                          rows={3}
+                          className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 text-sm font-medium focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                        />
                       </div>
                    </div>
 
