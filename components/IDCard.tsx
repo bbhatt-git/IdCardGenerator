@@ -25,17 +25,15 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
   const lastName = lastNameParts.join(' ');
 
   // Helper for applying styles with defaults
+  // We add !important via string manipulation or separate class for print safety, 
+  // but since React style objects don't support !important easily, we rely on the specific print CSS in index.html 
+  // to NOT override these, and we use high contrast defaults.
   const cardStyle: React.CSSProperties = {
     backgroundColor: config.cardBgColor,
     color: config.textColor,
     borderColor: 'rgba(30, 41, 59, 1)', // slate-800
     printColorAdjust: 'exact',
     WebkitPrintColorAdjust: 'exact',
-  };
-
-  const accentStyle = {
-    color: config.accentColor,
-    borderColor: config.accentColor,
   };
 
   return (

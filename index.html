@@ -18,43 +18,59 @@
                 margin: 10mm;
             }
             body {
-                background-color: white !important;
-                color: black !important;
+                /* Reset body for print but don't force colors globally with !important if it breaks components */
+                background-color: white;
+                color: black;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
             .no-print {
                 display: none !important;
             }
+            
             /* Reset the main container background */
             #root, main, .min-h-screen {
-                background-color: white !important;
+                background-color: white;
                 min-height: 0 !important;
                 height: auto !important;
                 padding: 0 !important;
                 margin: 0 !important;
             }
+
+            /* Protect the Card Colors */
+            .id-card-front, .id-card-back {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                /* Ensure text color set via inline style is respected */
+                color-adjust: exact !important;
+            }
+
             /* Grid layout for printing */
             .cards-grid {
                 display: grid !important;
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr 1fr; /* Two columns for efficiency if they fit, or 1fr */
                 gap: 20px;
                 padding: 0 !important;
             }
+            
             /* Ensure cards don't split across pages */
             .id-card-wrapper {
                 break-inside: avoid;
                 page-break-inside: avoid;
                 margin-bottom: 20px;
-                border: 1px dashed #ccc; /* Helper guide for cutting */
+                /* Remove border for cleaner print or keep as guide */
+                border: 1px dashed #ddd; 
                 padding: 10px;
-                border-radius: 8px;
+                display: flex;
+                justify-content: center;
             }
-            /* Hide the dark container styling of the card wrapper during print */
+
+            /* Remove the layout styles that center/pad the card wrapper on screen */
             .id-card-inner-wrapper {
                 background-color: transparent !important;
                 padding: 0 !important;
                 box-shadow: none !important;
+                gap: 20px !important; /* Maintain gap between front and back */
             }
         }
     </style>
