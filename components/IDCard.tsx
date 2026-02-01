@@ -49,9 +49,9 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
         <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-slate-800/50 to-transparent pointer-events-none"></div>
         
         {/* Header - Row Layout with Logo and Text */}
-        <div className="pt-10 px-5 pb-2 flex flex-row items-center gap-4 relative z-10 w-full">
-           {/* Logo Container - Clean, no border/background */}
-           <div className="shrink-0 w-16 h-16 flex items-center justify-center">
+        <div className="pt-10 px-5 pb-2 flex flex-row items-center gap-3 relative z-10 w-full">
+           {/* Logo Container - Clean, no border/background, aligned size (approx 44px to match text block height) */}
+           <div className="shrink-0 w-11 h-11 flex items-center justify-center">
               <RemoteImage src={config.logoUrl} alt="School Logo" className="w-full h-full object-contain" />
            </div>
            
@@ -63,9 +63,8 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
               >
                 {config.schoolName}
               </h1>
-              {/* Separator line removed as requested */}
               <p 
-                className="text-[9px] font-bold tracking-[0.1em] uppercase text-left leading-tight opacity-90 mt-1"
+                className="text-[9px] font-bold tracking-[0.1em] uppercase text-left leading-tight opacity-90 mt-0.5"
                 style={{ color: config.textColor }}
               >
                 {config.schoolAddress}
@@ -167,9 +166,9 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
         )}
 
         {/* Header Logo Area */}
-        <div className="relative z-10 flex flex-col items-center w-full mt-8">
-          <div className="mb-4 opacity-90 p-4 bg-white/5 rounded-2xl border border-white/5">
-             <RemoteImage src={config.backLogoUrl} alt="Logo" className="w-20 h-20" />
+        <div className="relative z-10 flex flex-col items-center w-full mt-10">
+          <div className="mb-2"> {/* Removed container borders/bg */}
+             <RemoteImage src={config.backLogoUrl} alt="Logo" className="w-32 h-32 object-contain" /> {/* Bigger */}
           </div>
           <h3 className="font-black tracking-[0.3em] text-lg" style={{ color: config.backTextColor }}>QWICKATTEND</h3>
           <div className="h-1 w-12 rounded-full mt-4" style={{ backgroundColor: config.accentColor }}></div>
