@@ -1,0 +1,5 @@
+{
+  "name": "QwickAttend ID Generator",
+  "description": "A high-fidelity ID card generator that transforms CSV student data into professional ID cards with QR codes, following the QwickAttend design system.",
+  "requestFramePermissions": []
+}
