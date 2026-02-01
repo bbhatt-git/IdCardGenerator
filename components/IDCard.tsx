@@ -1,3 +1,4 @@
+
 import React from 'react';
 import QRCodePattern from './QRCodePattern';
 import { Student, CardConfig } from '../types';
@@ -168,7 +169,7 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
           </div>
           
           <p 
-            className="text-[11px] text-center leading-relaxed max-w-[280px] font-medium" 
+            className="text-[10px] text-center leading-relaxed max-w-[300px] font-medium" 
             style={{ color: config.textColor, opacity: 0.8 }}
           >
             {config.disclaimerText}

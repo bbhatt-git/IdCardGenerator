@@ -28,7 +28,7 @@ const DEFAULT_CONFIG: CardConfig = {
   labelIssued: 'ISSUED',
   labelValid: 'VALID UNTIL',
   
-  disclaimerText: 'This card is the property of SARC EDUCATION FOUNDATION. If found, please return to the school administration.',
+  disclaimerText: 'This card is designated for the temporary testing of the QwickAttend system and does not constitute an official identification credential. Please handle this card with care to ensure the integrity and accuracy of the testing process.',
 
   showContact: true,
 };
@@ -566,7 +566,7 @@ const App: React.FC = () => {
                         <textarea 
                           value={config.disclaimerText} 
                           onChange={(e) => setConfig({...config, disclaimerText: e.target.value})}
-                          rows={3}
+                          rows={5}
                           className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 text-sm font-medium focus:outline-none focus:border-blue-500 transition-colors resize-none"
                         />
                       </div>
