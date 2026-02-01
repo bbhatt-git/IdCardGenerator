@@ -396,7 +396,7 @@ const App: React.FC = () => {
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                   {/* Logo Upload */}
                   <div>
-                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Institution Logo</h3>
+                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">School Logo</h3>
                     <div className="flex items-center gap-4">
                         <div className="w-16 h-16 bg-slate-900 border border-slate-700 rounded-xl flex items-center justify-center overflow-hidden">
                           {config.logoUrl ? (

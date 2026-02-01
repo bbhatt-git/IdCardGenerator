@@ -48,25 +48,33 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
         {config.showPattern && <CubePattern />}
         <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-slate-800/50 to-transparent pointer-events-none"></div>
         
-        {/* Header - Text Only, Centered */}
-        <div className="pt-12 px-6 pb-4 flex flex-col items-center justify-center relative z-10 text-center">
-          <h1 
-            className="text-[18px] font-black leading-tight tracking-widest uppercase font-inter drop-shadow-lg mb-2"
-            style={{ color: config.textColor }}
-          >
-            {config.schoolName}
-          </h1>
-          <div className="h-0.5 w-16 rounded-full mb-2" style={{ backgroundColor: config.accentColor, opacity: 0.5 }}></div>
-          <p 
-            className="text-[11px] font-bold tracking-[0.2em] uppercase"
-            style={{ color: config.textColor, opacity: 0.7 }}
-          >
-            {config.schoolAddress}
-          </p>
+        {/* Header - Row Layout with Logo and Text */}
+        <div className="pt-10 px-5 pb-2 flex flex-row items-center gap-4 relative z-10 w-full">
+           {/* Logo Container */}
+           <div className="shrink-0 w-16 h-16 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 p-2 flex items-center justify-center shadow-sm">
+              <RemoteImage src={config.logoUrl} alt="School Logo" className="w-full h-full object-contain" />
+           </div>
+           
+           {/* Text Container */}
+           <div className="flex flex-col items-start flex-1 min-w-0">
+              <h1 
+                className="text-[15px] font-black leading-tight tracking-wide uppercase font-inter drop-shadow-lg text-left w-full break-words"
+                style={{ color: config.textColor }}
+              >
+                {config.schoolName}
+              </h1>
+              <div className="h-0.5 w-10 rounded-full my-1.5" style={{ backgroundColor: config.accentColor }}></div>
+              <p 
+                className="text-[9px] font-bold tracking-[0.1em] uppercase text-left leading-tight opacity-90"
+                style={{ color: config.textColor }}
+              >
+                {config.schoolAddress}
+              </p>
+           </div>
         </div>
 
         {/* Photo Section */}
-        <div className="relative z-10 flex flex-col items-center justify-center flex-1 my-4">
+        <div className="relative z-10 flex flex-col items-center justify-center flex-1 my-2">
           {/* Photo Container - Larger for taller card */}
           <div 
              className="w-52 h-52 rounded-[2.5rem] bg-slate-800 border-4 shadow-2xl overflow-hidden relative group ring-1 ring-white/10"
@@ -84,7 +92,7 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
         </div>
 
         {/* Name Section */}
-        <div className="relative z-10 px-6 text-center mb-8">
+        <div className="relative z-10 px-6 text-center mb-6">
           <h2 
             className="text-4xl font-black uppercase tracking-tight leading-none drop-shadow-md break-words"
             style={{ color: config.textColor }}
