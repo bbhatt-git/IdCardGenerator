@@ -129,7 +129,7 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
 
       {/* BACK SIDE */}
       <div 
-        className="id-card-back relative w-[400px] h-[680px] rounded-[16px] overflow-hidden shadow-2xl flex flex-col items-center p-8 shrink-0 border-[4px] justify-between"
+        className="id-card-back relative w-[400px] h-[680px] rounded-[16px] overflow-hidden shadow-2xl flex flex-col items-center px-8 pt-8 pb-1 shrink-0 border-[4px] justify-between"
         style={cardStyle}
       >
         
@@ -159,15 +159,15 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
         </div>
         
         {/* Footer Text */}
-        <div className="relative z-10 flex flex-col items-center w-full mb-6">
-          <div className="mb-6 px-6 py-2 bg-slate-800 rounded-full border border-slate-700 shadow-lg">
+        <div className="relative z-10 flex flex-col items-center w-full mb-1">
+          <div className="mb-2 px-6 py-2 bg-slate-800 rounded-full border border-slate-700 shadow-lg">
              <span className="text-sm font-mono font-bold tracking-[0.2em]" style={{ color: config.accentColor }}>
                ID: {student.studentId}
              </span>
           </div>
           
           <p 
-            className="text-[10px] text-center leading-relaxed max-w-[300px] font-medium" 
+            className="text-[9px] text-center leading-tight max-w-[340px] font-medium" 
             style={{ color: config.textColor, opacity: 0.8 }}
           >
             {config.disclaimerText}
