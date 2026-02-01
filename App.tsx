@@ -4,7 +4,7 @@ import { Student, CardConfig } from './types';
 import IDCard from './components/IDCard';
 import { Upload, FileSpreadsheet, Download, Plus, Trash2, Edit2, X, Loader2, Image as ImageIcon, Palette, Type, Eye, FileText } from 'lucide-react';
 import { jsPDF } from 'jspdf';
-import { toPng } from 'html-to-image';
+import { toJpeg } from 'html-to-image';
 
 const DEFAULT_CONFIG: CardConfig = {
   schoolName: 'SARC EDUCATION FOUNDATION',
@@ -135,7 +135,8 @@ const App: React.FC = () => {
       const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: 'a4'
+        format: 'a4',
+        compress: true // Enable PDF compression
       });
 
       // Requested Size: 80mm x 136mm
@@ -199,19 +200,21 @@ const App: React.FC = () => {
         if (!frontEl || !backEl) continue;
 
         try {
-          // Capture settings matching the aspect ratio 80:136 (400:680)
+          // Optimized settings for reasonable file size (~300 DPI)
+          // Using JPEG significantly reduces size compared to PNG
+          // backgroundColor: '#ffffff' ensures no black artifacts on transparency conversion
           const commonOptions = {
-            quality: 1.0,
-            pixelRatio: 4, // High resolution for print
+            quality: 0.9,
+            pixelRatio: 2.5, // ~300 DPI for 80mm width (approx 945px wide)
             cacheBust: true,
-            backgroundColor: 'transparent',
+            backgroundColor: '#ffffff',
             width: 400, 
             height: 680,
             style: { transform: 'none', margin: '0' }
           };
 
-          const frontDataUrl = await toPng(frontEl, commonOptions);
-          const backDataUrl = await toPng(backEl, commonOptions);
+          const frontDataUrl = await toJpeg(frontEl, commonOptions);
+          const backDataUrl = await toJpeg(backEl, commonOptions);
 
           // Determine position
           const rowIndex = i % 2; // 0 for top row, 1 for bottom row
@@ -220,9 +223,9 @@ const App: React.FC = () => {
           const frontX = MARGIN_LEFT;
           const backX = MARGIN_LEFT + CARD_WIDTH + GAP_X;
 
-          // Add Images
-          doc.addImage(frontDataUrl, 'PNG', frontX, y, CARD_WIDTH, CARD_HEIGHT);
-          doc.addImage(backDataUrl, 'PNG', backX, y, CARD_WIDTH, CARD_HEIGHT);
+          // Add Images as JPEG to PDF
+          doc.addImage(frontDataUrl, 'JPEG', frontX, y, CARD_WIDTH, CARD_HEIGHT);
+          doc.addImage(backDataUrl, 'JPEG', backX, y, CARD_WIDTH, CARD_HEIGHT);
 
           // Draw Crop Marks
           drawCropMarks(frontX, y, CARD_WIDTH, CARD_HEIGHT);
@@ -239,18 +242,19 @@ const App: React.FC = () => {
           doc.setTextColor(150, 150, 150);
           doc.text(`Student: ${students[i].name} (${students[i].studentId})`, MARGIN_LEFT, y - 3);
 
-          await new Promise(resolve => setTimeout(resolve, 50));
+          // Small delay to allow GC and UI updates
+          await new Promise(resolve => setTimeout(resolve, 20));
 
         } catch (err) {
           console.error(`Error generating card ${i}`, err);
         }
       }
 
-      doc.save('QwickAttend_ID_Cards_80x136.pdf');
+      doc.save('QwickAttend_ID_Cards.pdf');
 
     } catch (error) {
       console.error("PDF Generation failed", error);
-      alert("Failed to generate PDF. Please try again.");
+      alert("Failed to generate PDF. Please try again or try a smaller batch.");
     } finally {
       setIsGenerating(false);
       setProgress(0);
