@@ -156,7 +156,7 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
 
       {/* BACK SIDE */}
       <div 
-        className="id-card-back relative w-[400px] h-[680px] rounded-[16px] overflow-hidden shadow-2xl flex flex-col items-center px-8 pt-8 pb-1 shrink-0 border-[4px] justify-between"
+        className="id-card-back relative w-[400px] h-[680px] rounded-[16px] overflow-hidden shadow-2xl flex flex-col items-center px-8 py-8 shrink-0 border-[4px] justify-between"
         style={cardStyle}
       >
         
@@ -166,7 +166,7 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
         )}
 
         {/* Header Logo Area */}
-        <div className="relative z-10 flex flex-col items-center w-full mt-10">
+        <div className="relative z-10 flex flex-col items-center w-full mt-2">
           <div className="mb-2"> {/* Removed container borders/bg */}
              <RemoteImage src={config.backLogoUrl} alt="Logo" className="w-32 h-32 object-contain" /> {/* Bigger */}
           </div>
@@ -175,7 +175,7 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
         </div>
 
         {/* QR Code Section */}
-        <div className="relative z-10 flex flex-col items-center justify-center flex-1 w-full my-6">
+        <div className="relative z-10 flex flex-col items-center justify-center flex-1 w-full my-4">
           <div className="p-6 rounded-3xl shadow-2xl" style={{ backgroundColor: config.qrBgColor }}>
             <QRCodePattern 
               value={student.studentId} 
@@ -186,8 +186,8 @@ const IDCard: React.FC<IDCardProps> = ({ student, config, id }) => {
         </div>
         
         {/* Footer Text */}
-        <div className="relative z-10 flex flex-col items-center w-full mb-1">
-          <div className="mb-2 px-6 py-2 bg-slate-800 rounded-full border border-slate-700 shadow-lg">
+        <div className="relative z-10 flex flex-col items-center w-full">
+          <div className="mb-4 px-6 py-2 bg-slate-800 rounded-full border border-slate-700 shadow-lg">
              <span className="text-sm font-mono font-bold tracking-[0.2em]" style={{ color: config.accentColor }}>
                ID: {student.studentId}
              </span>
